@@ -10,7 +10,7 @@ public abstract class Constraint {
    * A human readable description of the constraint.
    * To help debugging.
    */
-  public String description;
+  public abstract String description();
 
   /**
    * Checks if the constraint is satisfied by the an assignment.

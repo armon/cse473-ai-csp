@@ -55,8 +55,11 @@ public class Backtrack {
       // Check the consistency
       if (!consistentAssignment(newAssign, v)) { continue; }
 
+      // Try making some inferences
+      newAssign = inference(assign, v);
+
       // Recurse
-      newAssign = recursiveSolve(assign);
+      newAssign = recursiveSolve(newAssign);
       if (newAssign != null) return newAssign;
     }
 
@@ -82,6 +85,7 @@ public class Backtrack {
    * add heuristics.
    */
   protected List<Object> domainValues(Assignment assign, Variable v) {
+    if (assign.getDomain(v) != null) return assign.getDomain(v);
     return v.domain();
   }
 
@@ -100,5 +104,13 @@ public class Backtrack {
     }
 
     return true;
+  }
+
+  /**
+   * Returns a new assignment based on some inferences.
+   * This can be sub-classed to add heuristics.
+   */
+  protected Assignment inference(Assignment assign, Variable v) {
+    return assign;
   }
 }

@@ -11,11 +11,18 @@ public class Assignment {
   Map<Variable, Object> assignments = null;
 
   /**
+   * This private map is used to track the restricted domain of variables
+   */
+  Map<Variable, List<Object>> domain = null;
+
+
+  /**
    * Creates a new blank assignment.
    */
   static Assignment blank() {
     Assignment blank = new Assignment();
     blank.assignments = new HashMap<Variable, Object>();
+    blank.domain = new HashMap<Variable,List<Object>>();
     return blank;
   }
 
@@ -27,6 +34,7 @@ public class Assignment {
     Assignment n = new Assignment();
     n.assignments = new HashMap<Variable,Object>(assignments);
     n.assignments.put(v, val);
+    n.domain = new HashMap<Variable,List<Object>>(domain);
     return n;
   }
 
@@ -37,6 +45,20 @@ public class Assignment {
    */
   public Object getValue(Variable v) {
     return assignments.get(v);
+  }
+
+  /**
+   * Assigns a restricted domain to a variable.
+   */
+  public void restrictDomain(Variable v, List<Object> dom) {
+    domain.put(v,dom);
+  }
+
+  /**
+   * Returns the restricted domain of a variable.
+   */
+  public List<Object> getDomain(Variable v) {
+    return domain.get(v);
   }
 
   /**
