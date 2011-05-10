@@ -5,6 +5,13 @@ import java.util.*;
  * Sudoku as a Constraint Satisfaction Problem.
  */
 public class Sudoku extends CSPProblem {
+
+  public Sudoku() {
+    // Generate everything
+    variables();
+    constraints();
+  }
+
   /**
    * Implements each tile as a variable in a CSP
    */
@@ -15,7 +22,7 @@ public class Sudoku extends CSPProblem {
       tileNumber = i;
     }
     public String description() {
-      return "Tile "+tileNumber+" ("+(tileNumber/8)+","+(tileNumber%8)+")";
+      return "Tile "+tileNumber+" ("+(tileNumber/9)+","+(tileNumber%9)+")";
     }
     public List<Object> domain() {
       List<Object> vals = new LinkedList<Object>();
@@ -52,8 +59,24 @@ public class Sudoku extends CSPProblem {
       HashSet<Integer> values = new HashSet<Integer>(9);
       for (SudokuTile v : variables) {
         Integer val = (Integer)asign.getValue(v);
-        if (val != null && values.contains(val)) return false;
+        if (val == null || values.contains(val))  {
+          return false;
+        }
         values.add(val);
+      }
+      return true;
+    }
+
+    public boolean consistent(Assignment asign) {
+      HashSet<Integer> values = new HashSet<Integer>(9);
+      for (SudokuTile v : variables) {
+        Integer val = (Integer)asign.getValue(v);
+        if (val != null) {
+          if (values.contains(val))  {
+            return false;
+          }
+          values.add(val);
+        }
       }
       return true;
     }
@@ -106,7 +129,7 @@ public class Sudoku extends CSPProblem {
           // This is disgusting...
           for (int row=0;row<3;row++) {
             for (int col=0;col<3;col++) {
-              int piece = (gridRow*3+row)*8 + gridCol+col;
+              int piece = (gridRow*3+row)*9 + gridCol*3+col;
               constr.variables.add(tiles.get(piece));
             }
           }
@@ -116,6 +139,14 @@ public class Sudoku extends CSPProblem {
       }
     }
     return new LinkedList<Constraint>(constraints);
+  }
+
+  /**
+   * Returns a new assignment based on some inferences.
+   * This can be sub-classed to add heuristics.
+   */
+  public Assignment inference(Assignment assign, Variable v) {
+    return assign;
   }
 }
 
