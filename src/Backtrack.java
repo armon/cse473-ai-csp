@@ -46,17 +46,19 @@ public class Backtrack {
     if (v == null) return null;
 
     // Get the domain values for a variable
-    List<Object> values = domainValues(assign, v);
+    List<Object> values = problem.domainValues(assign, v);
 
     for (Object value : values) {
       // Make a new assignment
       Assignment newAssign = assign.assign(v, value);
 
       // Check the consistency
-      if (!consistentAssignment(newAssign, v)) { continue; }
+      if (!problem.consistentAssignment(newAssign, v)) { 
+        continue; 
+      }
 
       // Try making some inferences
-      newAssign = inference(assign, v);
+      newAssign = problem.inference(newAssign, v);
 
       // Recurse
       newAssign = recursiveSolve(newAssign);
@@ -77,40 +79,5 @@ public class Backtrack {
       if (assign.getValue(v) == null) return v;
     }
     return null;
-  }
-
-  /**
-   * Returns a list of potential domain values
-   * for a varaible. This can be sub-classed to
-   * add heuristics.
-   */
-  protected List<Object> domainValues(Assignment assign, Variable v) {
-    if (assign.getDomain(v) != null) return assign.getDomain(v);
-    return v.domain();
-  }
-
-  /**
-   * Returns if the new variable assignment is
-   * consistent. This can be sub-classed to
-   * add heuristics.
-   */
-  protected boolean consistentAssignment(Assignment assign, Variable v) {
-    // Get all the constraints on the variable
-    List<Constraint> constr = problem.variableConstraints(v);
-
-    // Check everything is consistent
-    for (Constraint c : constr) {
-      if (!c.satisfied(assign)) return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Returns a new assignment based on some inferences.
-   * This can be sub-classed to add heuristics.
-   */
-  protected Assignment inference(Assignment assign, Variable v) {
-    return assign;
   }
 }

@@ -27,14 +27,13 @@ public abstract class CSPProblem {
     // even make sense
     if (constraints.size() > asign.size()) { return false; }
 
-    boolean satisfied = true;
     for (Constraint c : constraints) {
       if (!c.satisfied(asign)) {
-        satisfied = false;
-        break;
+        return false;
       }
     }
-    return satisfied;
+
+    return true;
   }
 
 
@@ -67,5 +66,41 @@ public abstract class CSPProblem {
       }
     }
     return varConstraints.get(v);
+  }
+
+  
+  /**
+   * Returns a list of potential domain values
+   * for a varaible. This can be sub-classed to
+   * add heuristics.
+   */
+  public List<Object> domainValues(Assignment assign, Variable v) {
+    if (assign.getDomain(v) != null) return assign.getDomain(v);
+    return v.domain();
+  }
+
+  /**
+   * Returns if the new variable assignment is
+   * consistent. This can be sub-classed to
+   * add heuristics.
+   */
+  public boolean consistentAssignment(Assignment assign, Variable v) {
+    // Get all the constraints on the variable
+    List<Constraint> constr = variableConstraints(v);
+
+    // Check everything is consistent
+    for (Constraint c : constr) {
+      if (!c.consistent(assign)) return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Returns a new assignment based on some inferences.
+   * This can be sub-classed to add heuristics.
+   */
+  public Assignment inference(Assignment assign, Variable v) {
+    return assign;
   }
 }
