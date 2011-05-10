@@ -3,7 +3,7 @@ import java.util.*;
 public class Main {
 
   public static void main(String[] args) {
-    Sudoku sud = new Sudoku();
+    Sudoku sud = new Sudoku(16);
     List<Variable> vars = sud.variables();
     List<Constraint> constr = sud.constraints();
 
