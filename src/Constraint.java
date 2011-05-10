@@ -18,6 +18,12 @@ public abstract class Constraint {
   public abstract boolean satisfied(Assignment asgn);
 
   /**
+   * Checks if the constraint is consistent with the an assignment.
+   * It is possible to be consistent without being satisfied.
+   */
+  public abstract boolean consistent(Assignment asgn);
+
+  /**
    * Returns the variables that the constraint relies on
    */
   public abstract List<Variable> reliesOn();
