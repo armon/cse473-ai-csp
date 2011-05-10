@@ -1,6 +1,6 @@
 CC=javac
 CFLAGS=-d build/ -cp src/
-DEPS=Backtrack.class Sudoku.class
+DEPS=Backtrack.class Sudoku.class Main.class
 
 MAIN: $(DEPS)
 
