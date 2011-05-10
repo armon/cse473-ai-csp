@@ -21,13 +21,11 @@ public abstract class CSPProblem {
    * Checks if a given assignment satisfies the problem.
    */
   public boolean satisfiedByAssignment(Assignment asign) {
-    List<Constraint> constraints = constraints();
-
     // Check that we have enough assignments for this to
     // even make sense
-    if (constraints.size() > asign.size()) { return false; }
+    if (variables().size() > asign.size()) { return false; }
 
-    for (Constraint c : constraints) {
+    for (Constraint c : constraints()) {
       if (!c.satisfied(asign)) {
         return false;
       }
@@ -75,7 +73,8 @@ public abstract class CSPProblem {
    * add heuristics.
    */
   public List<Object> domainValues(Assignment assign, Variable v) {
-    if (assign.getDomain(v) != null) return assign.getDomain(v);
+    List<Object> domain = assign.getDomain(v);
+    if (domain != null) return domain;
     return v.domain();
   }
 

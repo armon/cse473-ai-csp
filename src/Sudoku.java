@@ -12,16 +12,22 @@ public class Sudoku extends CSPProblem {
   int boardSize = 9;
 
   // List of variable tiles
-  List<SudokuTile> tiles;
+  List<Variable> tiles;
 
   // List of all constraints
-  List<AllDiff> constraints;
+  List<Constraint> constraints;
+ 
+  // List of tile domain
+  List<Object> domain = new LinkedList<Object>();
 
   public Sudoku(int size) {
     // Generate everything
     boardSize = size;
-    tiles = new ArrayList<SudokuTile>(boardSize*boardSize);
-    constraints = new ArrayList<AllDiff>(boardSize*3);
+    for (int i=1;i<=boardSize;i++) {
+      domain.add(i);
+    }
+    tiles = new ArrayList<Variable>(boardSize*boardSize);
+    constraints = new ArrayList<Constraint>(boardSize*3);
     variables();
     constraints();
   }
@@ -30,6 +36,7 @@ public class Sudoku extends CSPProblem {
    * Implements each tile as a variable in a CSP
    */
   public class SudokuTile extends Variable {
+
     public int tileNumber; // Between 0 and 80
 
     public SudokuTile(int i) {
@@ -39,11 +46,7 @@ public class Sudoku extends CSPProblem {
       return "Tile "+tileNumber+" ("+(tileNumber/boardSize)+","+(tileNumber%boardSize)+")";
     }
     public List<Object> domain() {
-      List<Object> vals = new LinkedList<Object>();
-      for (int i=1;i<=boardSize;i++) {
-        vals.add(i);
-      }
-      return vals;
+      return domain;
     }
   }
 
@@ -57,7 +60,7 @@ public class Sudoku extends CSPProblem {
         tiles.add(new SudokuTile(i));
       }
     }
-    return new LinkedList<Variable>(tiles);
+    return tiles;
   }
 
   /**
@@ -65,41 +68,41 @@ public class Sudoku extends CSPProblem {
    * to have a unique value.
    */
   public class AllDiff extends Constraint {
-    public List<SudokuTile> variables = new LinkedList<SudokuTile>();
+    public List<Variable> variables = new LinkedList<Variable>();
 
     public boolean satisfied(Assignment asign) {
-      HashSet<Integer> values = new HashSet<Integer>(boardSize);
-      for (SudokuTile v : variables) {
+      boolean[] seen = new boolean[boardSize+1];
+      for (Variable v : variables) {
         Integer val = (Integer)asign.getValue(v);
-        if (val == null || values.contains(val))  {
+        if (val == null || seen[val])  {
           return false;
         }
-        values.add(val);
+        seen[val] = true;
       }
       return true;
     }
 
     public boolean consistent(Assignment asign) {
-      HashSet<Integer> values = new HashSet<Integer>(boardSize);
-      for (SudokuTile v : variables) {
+      boolean[] seen = new boolean[boardSize+1];
+      for (Variable v : variables) {
         Integer val = (Integer)asign.getValue(v);
         if (val != null) {
-          if (values.contains(val))  {
+          if (seen[val])  {
             return false;
           }
-          values.add(val);
+          seen[val] = true;
         }
       }
       return true;
     }
 
     public List<Variable> reliesOn() {
-      return new LinkedList<Variable>(variables);
+      return variables;
     }
 
     public String description() {
       String desc = "Constraint on {\n";
-      for (SudokuTile v : variables) {
+      for (Variable v : variables) {
         desc += "\t"+v.description()+"\n";
       }
       desc +="}";
@@ -149,7 +152,7 @@ public class Sudoku extends CSPProblem {
         }
       }
     }
-    return new LinkedList<Constraint>(constraints);
+    return constraints;
   }
 
   /**
@@ -160,24 +163,33 @@ public class Sudoku extends CSPProblem {
     // Get all the affected constraints
     List<Constraint> constr = variableConstraints(v);
 
-    // Get all the affected variables
-    Set<Variable> vars = new HashSet<Variable>();
-    for (Constraint c : constr) {
-      vars.addAll(c.reliesOn());
-    }
-
     // Get the assigned value
     Object val = assign.getValue(v);
 
-    // Retrict the domain of all other variables
-    for (Variable rel : vars) {
-      List<Object> domain = new LinkedList<Object>(domainValues(assign, rel));
-      int pre = domain.size();
-      domain.remove(val);
-      assign.restrictDomain(rel, domain);
+    // Get all the affected variables
+    for (Constraint c : constr) {
+      for (Variable rel : c.reliesOn()) {
+        // Skip the current variable
+        if (rel == v) continue;
+
+        List<Object> domain = domainValues(assign, rel);
+        if (domain.contains(val)) {
+          domain = new LinkedList<Object>(domain);
+          domain.remove(val);
+          assign.restrictDomain(rel, domain);
+          if (domain.size() == 1) {
+            assign = assign.assign(rel, domain.get(0));
+          }
+        }
+      }
     }
 
     return assign;
+  }
+
+  // Forward checking allows us to skip this step.
+  public boolean consistentAssignment(Assignment assign, Variable v) {
+    return true;
   }
 }
 
