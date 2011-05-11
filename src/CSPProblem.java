@@ -89,11 +89,8 @@ public abstract class CSPProblem {
    * add heuristics.
    */
   public boolean consistentAssignment(Assignment assign, Variable v) {
-    // Get all the constraints on the variable
-    List<Constraint> constr = variableConstraints(v);
-
     // Check everything is consistent
-    for (Constraint c : constr) {
+    for (Constraint c : constraints()) {
       if (!c.consistent(assign)) return false;
     }
 
