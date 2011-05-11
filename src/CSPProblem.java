@@ -18,6 +18,11 @@ public abstract class CSPProblem {
   public abstract List<Constraint> constraints();
 
   /**
+   * The number of consistency checks performed.
+   */
+  //public int consistencyChecks = 0;
+
+  /**
    * Checks if a given assignment satisfies the problem.
    */
   public boolean satisfiedByAssignment(Assignment asign) {
@@ -99,7 +104,7 @@ public abstract class CSPProblem {
    * Returns a new assignment based on some inferences.
    * This can be sub-classed to add heuristics.
    */
-  public Assignment inference(Assignment assign, Variable v) {
+  public Assignment inference(Assignment assign, Variable v) throws IllegalStateException {
     return assign;
   }
 }

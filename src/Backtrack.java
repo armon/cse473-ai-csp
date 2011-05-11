@@ -58,7 +58,11 @@ public class Backtrack {
       }
 
       // Try making some inferences
-      newAssign = problem.inference(newAssign, v);
+      try {
+        newAssign = problem.inference(newAssign, v);
+      } catch (IllegalStateException e) {
+        continue;
+      }
 
       // Recurse
       newAssign = recursiveSolve(newAssign);

@@ -84,7 +84,19 @@ public class Sudoku extends CSPProblem {
 
     public boolean consistent(Assignment asign) {
       boolean[] seen = new boolean[boardSize+1];
+      boolean[] avail = new boolean[boardSize+1];
+      int constraintDomain = 0;
+
       for (Variable v : variables) {
+        // Check if this variable adds to the domain of the constraint
+        for (Object val : domainValues(asign, v)) {
+          if (!avail[(Integer)val]) {
+            constraintDomain++;
+            avail[(Integer)val] = true;
+          }
+        }
+
+        // Check for a duplicate value
         Integer val = (Integer)asign.getValue(v);
         if (val != null) {
           if (seen[val])  {
@@ -92,6 +104,11 @@ public class Sudoku extends CSPProblem {
           }
           seen[val] = true;
         }
+      }
+
+      // Check if there are not enough values
+      if (variables.size() > constraintDomain) {
+        return false;
       }
       return true;
     }
@@ -159,7 +176,7 @@ public class Sudoku extends CSPProblem {
    * Returns a new assignment based on some inferences.
    * We will override the domain of other variables
    */
-  public Assignment inference(Assignment assign, Variable v) {
+  public Assignment inference(Assignment assign, Variable v) throws IllegalStateException {
     // Get all the affected constraints
     List<Constraint> constr = variableConstraints(v);
 
@@ -177,19 +194,18 @@ public class Sudoku extends CSPProblem {
           domain = new LinkedList<Object>(domain);
           domain.remove(val);
           assign.restrictDomain(rel, domain);
-          if (domain.size() == 1) {
-            assign = assign.assign(rel, domain.get(0));
+          if (assign.getValue(rel) == null) {
+            if (domain.size() == 1) {
+              assign = assign.assign(rel, domain.get(0));
+            } else if (domain.size() == 0) {
+              throw new IllegalStateException("No remaining assignments for variable: "+rel.description());
+            }
           }
         }
       }
     }
 
     return assign;
-  }
-
-  // Forward checking allows us to skip this step.
-  public boolean consistentAssignment(Assignment assign, Variable v) {
-    return true;
   }
 }
 
