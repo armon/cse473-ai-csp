@@ -22,7 +22,7 @@ public class MRVBacktrack extends Backtrack {
 
   /**
    * Returns an assigned variable to try to assign.
-   * This can be sub-classed to add heuristics.
+   * Apply a Minimum remaining values heuristic.
    */
   protected Variable unassignedVar(Assignment assign) {
     int minDomain = Integer.MAX_VALUE;
@@ -41,8 +41,57 @@ public class MRVBacktrack extends Backtrack {
         }
       }
     }
-    System.out.println("Min: "+minDomain);
 
     return minVar;
+  }
+
+  /**
+   * Returns an ordered list of values to try to assign.
+   * Apply a least constraining value heuristic
+   */
+  protected List<Object> orderValues(Assignment asign, List<Object> domain, Variable v) {
+    PriorityQueue<ValueAssignment> priority = new PriorityQueue<ValueAssignment>();
+    for (Object val : domain) {
+      try {
+        priority.add(new ValueAssignment(asign, v, val));
+      } catch (IllegalStateException e) {}
+    }
+
+    LinkedList<Object> ordered = new LinkedList<Object>();
+    int size = priority.size();
+    for (int i=0;i<size;i++) {
+      ValueAssignment next = priority.poll();
+      ordered.add(next.value);
+    }
+
+    return ordered;
+  }
+
+  class ValueAssignment implements Comparable<ValueAssignment> {
+    public Integer domain = 0;
+    public Object value;
+
+    public ValueAssignment(Assignment init, Variable v, Object val) throws IllegalStateException {
+      // Make a new assignment
+      value = val;
+      Assignment newAssign = init.assign(v, val);
+
+      // Check the consistency
+      if (!problem.consistentAssignment(newAssign, v)) { 
+        throw new IllegalStateException("Bad Value");
+      }
+
+      // Try making some inferences
+      newAssign = problem.inference(newAssign, v);
+
+      // Calculate the total domain size
+      for (Variable var : problem.variables()) {
+        domain += problem.domainValues(newAssign, var).size();
+      }
+    }
+
+    public int compareTo(ValueAssignment other) {
+      return domain.compareTo(other.domain);
+    }
   }
 }
