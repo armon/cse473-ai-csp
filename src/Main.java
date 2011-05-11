@@ -66,7 +66,7 @@ public class Main {
 
 
   public Assignment solve() {
-    Backtrack solve = new Backtrack(sud, initial);
+    Backtrack solve = new MRVBacktrack(sud, initial);
     return solve.solve();
   }
 
