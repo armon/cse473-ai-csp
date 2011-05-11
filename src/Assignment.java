@@ -35,6 +35,12 @@ public class Assignment {
     n.assignments = new HashMap<Variable,Object>(assignments);
     n.assignments.put(v, val);
     n.domain = new HashMap<Variable,List<Object>>(domain);
+
+    // Restrict the domain to only a single value
+    List<Object> varDomain = new LinkedList<Object>();
+    varDomain.add(val);
+    n.restrictDomain(v, varDomain);
+
     return n;
   }
 
