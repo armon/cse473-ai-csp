@@ -53,16 +53,16 @@ public class Backtrack {
       // Make a new assignment
       Assignment newAssign = assign.assign(v, value);
 
-      // Check the consistency
-      if (!problem.consistentAssignment(newAssign, v)) { 
-        continue; 
-      }
-
       // Try making some inferences
       try {
         newAssign = problem.inference(newAssign, v);
       } catch (IllegalStateException e) {
         continue;
+      }
+
+      // Check the consistency
+      if (!problem.consistentAssignment(newAssign, v)) { 
+        continue; 
       }
 
       // Recurse
