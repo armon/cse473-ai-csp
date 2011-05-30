@@ -11,5 +11,5 @@ run:
 	$(CC) $(CFLAGS) $<
 
 clean:
-	rm buiild/*.class
+	rm build/*.class
 

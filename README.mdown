@@ -1,0 +1,78 @@
+# CSE473 Intro to AI, Constraint Satisfaction Solver #
+
+This is a project for CSE473 Introduction to Artificial Intelligence at the University of Washington.
+The goal is to implement a generic solver for Constraint Satisfaction Problems (CSP), by implementing
+a number of the generic algorithms and heuristics.
+
+## Abstraction ##
+
+We build our project around a specific abstraction of CSPs and them implement Sudoku
+as a specific instance of a CSP.
+
+A generic CSP is modeled as a subclass of the CSPProblem class. This class exports
+a set of "Variables" and "Constraints". These are represented as sub-classes of the
+Variable and Constraint classes respectively. A Variable is very simple, it has a description,
+and a domain of possible values. A Constraint can be any arbitrary function, but it must operate
+over a set of Variables. A problem is thus composed as any set of variables and constraints.
+The problem is only satisfied by an Assignment which satisfies all constraints.
+
+So, the last piece is an Assignment. An Assignment is a simple mapping between Variables
+and values in their domains. However, an Assignment also understands that the domains
+of variables may be restricted by value assignments, so it supports constraining of variable
+domains.
+
+To solve any generic CSP we provide a Backtrack, a class which implements a simple backtracking
+solver. It selects unassigned variables, assigns a value, makes any possible inferences, and
+continues this process until all options have been exhausted or a solution is found. This works
+well for simple problems, especially when our inference implements forward checking to constrain
+the variable domains.
+
+For more difficult problems, MRVBacktrack is provided. This class is based on Backtrack, but
+adds two new heuristics: Minimum-Remaining-Values (MRV) as the selection criteria for picking
+the next variable to assign to, and Least-Constraining-Value (LCV) as the heuristic to select
+which value should be assigned. This heuristics can dramatically accelerate finding a solution,
+and allow much more difficult problems to be solved.
+
+## Sudoku ##
+
+As an example of a CSP problem, there is an implementation of the Sudoku problem space.
+An NxN sized Sudoku board has N^2 variables (one per tile), as well as 3*N Constraints,
+one for each row, column, and sub-grid. The variables all initially have a domain of 1..N,
+and the constrains are all "All-Diff" constraints, meaning each variable must have a different
+value. Our problem also implements a simple inference function that is used to perform forward
+checking. Once we assign a value to a tile, we remove that value from the domain of all other tiles
+in that row, column, and sub-grid. This aggressively prunes the domain space, and decreases time
+until hitting a dead-end or finding a solution.
+
+The Main class that is provided will either solve a blank Sudoku board if given no arguments,
+or will take a file describing the board and will generate a solution to it.
+
+The file is of the format:
+
+    N
+    K
+    Row1 Col1 Val
+    Row2 Col2 Val
+    ...
+    RowK ColL Val
+    
+The first row defines the board size (NxN), the second line specifies the number
+of assigned rows, and each assignment is provided as Row, Column, and Value.
+
+The filename is the first argument that is provided to the main method.
+
+## Using it ##
+
+To build the program, just use make:
+
+    $ make
+    $ make run # Runs with generic board
+    
+To specify a file, we can do this:
+
+    $ cd build;
+    $ java Main ~/board.txt
+
+
+
+
